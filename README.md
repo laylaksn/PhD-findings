@@ -12,7 +12,7 @@ To address these limitations, PGD algorithms based on rigorously derived Least-S
 formulations are developed based on optimal first-order reformulations of the problems. The
 theoretical framework is based on ADN theory, which is used to address practical issues
 and convergence considerations. A novel approach to solving elliptic PDEs is presented
-based on a PGD which solves the minimisation of a discrete rather than a continuous LeastSquares functional. The spectral element method which combines the flexibility of finite
+based on a PGD which solves the minimisation of a discrete rather than a continuous Least-Squares functional. The spectral element method which combines the flexibility of finite
 element methods with the accuracy of spectral methods is used as the foundation of the
 discretisation.
 The application of the Least-Squares PGD algorithm to the Poisson, convection-diffusion
