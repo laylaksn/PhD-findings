@@ -28,10 +28,10 @@ no_enrichment=5;
 Nvalues=[8,12,16,20] ;
 
 % Max number of iterations
-max_iterations = 1000;
+max_iterations = 100;
 
 % Stopping criterion
-epsilon=10^(-12);
+epsilon=10^(-10);
 
 cumTime=0;
 executionTimes = [];
@@ -42,6 +42,7 @@ L2V=zeros(length(Nvalues),1);
 
 for number=1:length(Nvalues)
 
+    each_count_value=[];
     N=Nvalues(number);
     N1=N+1;
 
@@ -181,40 +182,47 @@ for number=1:length(Nvalues)
     %Start approximations
     Xphi = zeros(N+1,Q ) ;    Xu = zeros(N+1,Q ) ;    Xv = zeros(N+1,Q ) ;
     Yphi = zeros(N+1,Q ) ;    Yu = zeros(N+1,Q ) ;    Yv = zeros(N+1,Q ) ;
-
+     
+    startTime = cputime;
     %Qth enrichments
     for term = 1:no_enrichment
         
-        startTime = cputime;
+        
         
         %Initialize the Matrices containing the known Q−1 enrichments
         Pphi = zeros(N-1);
         Pu = zeros(N+1,N-1);
         Pv = zeros(N-1,N+1);
         
-        XphiA = zeros(N-1,Q);
-        XphiM= zeros(N-1,Q);
-        XphiL= zeros(N+1,Q);
-        XuA= zeros(N+1,Q);
-        XuM= zeros(N+1,Q);
-        XuL= zeros(N-1,Q);
-        XuLT = zeros(N-1,Q);
-        XvA= zeros(N-1,Q);
-        XvM= zeros(N-1,Q);
-        XvL= zeros(N+1,Q);
-        XvLT = zeros(N+1,Q);
-        YphiA= zeros(N-1,Q);
-        YphiM= zeros(N-1,Q);
-        YphiL= zeros(N+1,Q);
-        YuA= zeros(N-1,Q);
-        YuM= zeros(N-1,Q);
-        YuL= zeros(N+1,Q);
-        YuLT = zeros(N+1,Q);
-        YvA= zeros(N+1,Q);
-        YvL= zeros(N-1,Q);
-        YvLT = zeros(N-1,Q);
-        YvM= zeros(N+1,Q);
         
+        XphiA = zeros(N-1, Q);
+        XphiM = zeros(N-1, Q);
+        XphiL = zeros(N+1, Q);
+        
+        XuA   = zeros(N+1, Q);
+        XuM   = zeros(N+1, Q);
+        XuL   = zeros(N-1, Q);
+        XuLT  = zeros(N-1, Q);
+        
+        XvA   = zeros(N-1, Q);
+        XvM   = zeros(N-1, Q);
+        XvL   = zeros(N+1, Q);
+        XvLT  = zeros(N+1, Q);
+        
+        YphiA = zeros(N-1, Q);
+        YphiM = zeros(N-1, Q);
+        YphiL = zeros(N+1, Q);
+        
+        YuA   = zeros(N-1, Q);
+        YuM   = zeros(N-1, Q);
+        YuL   = zeros(N+1, Q);
+        YuLT  = zeros(N+1, Q);
+        
+        YvA   = zeros(N+1, Q);
+        YvM   = zeros(N+1, Q);
+        YvL   = zeros(N-1, Q);
+        YvLT  = zeros(N-1, Q);
+
         for i = 1:N-1
             for j = 1:Q
                 for k = 1:N+1
@@ -344,12 +352,12 @@ for number=1:length(Nvalues)
             end
     
         end
-        endTime = cputime;       
-
-        % Calculate execution time for this iteration
-        iterationTime = endTime - startTime;
-
-        cumTime = cumTime + iterationTime;
+        each_count_value = [each_count_value, counter];   
+        % 
+        % % Calculate execution time for this iteration
+        % iterationTime = endTime - startTime;
+        % 
+        % cumTime = cumTime + iterationTime;
        
         %setting XQ YQ from the calculated values
         xphi = Rphi ;        xu= Ru;        xv = Rv ;
@@ -377,8 +385,9 @@ for number=1:length(Nvalues)
                     approxv(l,k) = approxv(l,k) + Yv(k,j)*Xv(l,j) ;
                 end
             end
-        end
-            
+        end 
+        
+
         %working out the error
         PHIerror= zeros(N+1) ;            PHImesh= zeros(N+1) ;
         Umesh = zeros(N+1) ;              Vmesh = zeros(N+1) ;
@@ -414,23 +423,63 @@ for number=1:length(Nvalues)
  
     end
 
+    each_count_value = [each_count_value, counter];   
+    endTime = cputime;       
+    enrichmentTime(number) = endTime - startTime; 
+
     L2phi(number)=QL2phierror;
     L2U(number)=QL2uerror;
     L2V(number)=QL2verror;
 end
+each_count_b(:) = each_count_value;
  
-N_values=Nvalues';
- 
-L2table=table(N_values,L2phi,L2U,L2V);
-disp(L2table);
+N_values=Nvalues'; 
 
-figure;
-set(gca,'fontsize',14);
+figure('Units', 'normalized', 'Position', [0.2 0.2 0.5 0.5]);;
 set(gcf, 'Color', 'white')
 handles = semilogy(1:no_enrichment,QL2phi, 'Linewidth', 2);
-legend('$N=8$','$N=12$','$N=16$','$N=20$','interpreter','latex' )
-grid on
-xlabel('$Q$ enrichments','interpreter','latex','fontsize',14)
+legend('$N=8$','$N=12$','$N=16$','$N=20$','interpreter','latex','FontSize', 14 )
+grid on 
 xlim([1 no_enrichment])
-xticks(1:1:no_enrichment)
-ylabel('$L^{2}$ Error in $\phi$','interpreter','latex','fontsize',14)
+xticks(1:1:no_enrichment) 
+set(gca,'fontsize',14);
+xlabel('$Q$ enrichments','interpreter','latex','fontsize',20)
+ylabel('$L^2$ Errors in $\phi$','interpreter','latex','fontsize',20) 
+
+fprintf('L2 errors for Example 5, i=3, using the LS SM PGD, after three enrichments:')
+fprintf('\n');
+fprintf('\n'); 
+fprintf('N =       ');
+fprintf('%8d ', Nvalues);
+fprintf('\n-----------------------------------------------------\n');
+fprintf('L2 error φ   ');
+fprintf('%6.2e ', QL2phi(3,:)); 
+fprintf('\n');
+
+fprintf('L2 errors for u when N=20 : ')
+disp(L2U(end))
+fprintf('L2 errors for v when N=20 : ')
+disp(L2V(end))
+fprintf('\n');
+fprintf('%d, %d and %d ADFPA iterations required at the first and second enrichment stages for Example 5, i=3, using the LS SM PGD, with epsilon = %6.2e\n', ...
+    each_count_b(1), each_count_b(2), each_count_b(3), epsilon);
+fprintf('\n');
+ 
+fprintf('Time taken (in seconds):')
+fprintf('\n');
+fprintf('N =          ');
+fprintf('%8d ', Nvalues);
+fprintf('\n');
+fprintf('Time       ');
+disp( enrichmentTime); 
+
+
+figure; 
+set(gcf, 'Color', 'white')
+for i = 1:3
+    subplot(3,1,i);
+    surf(node, node, Xphi(:,i) * Yphi(:,i)');   
+    title(sprintf('Approximation from q = %d', i));
+    xlabel('x');
+    ylabel('y');
+end
