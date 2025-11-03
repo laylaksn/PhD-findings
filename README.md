@@ -1,5 +1,5 @@
 # PhD-findings
-Thesis and code to be uploaded soon...
+This repository contains the code I used to obtain results from my PhD thesis.
 
 # Summary
 
