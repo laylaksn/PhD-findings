@@ -629,6 +629,81 @@ u_err = Nerru';
 v_err = Nerrv';
  
  
+ Fxy = (2)*(pi^2)*sin(pi*xdomain).*(sin(pi*ydomain'))  ;
+ D=GlobalDiff;
+
+for i=1:N*Kx-(Kx-1)
+    w(i)= M(i,i);
+end
+
+w(N)=0;
+w(2*N-1)=0;
+
+outersum1=0; 
+for m = 1:N*Kx-(Kx-1) 
+innersum1=0;    
+   for n =1:N*Kx-(Kx-1) 
+       sum1=0;
+       sum2=0; 
+            for k=1:N*Kx-(Kx-1) 
+               sum1 = sum1+(D(m,k)*approxu(k,n));
+               sum2 = sum2+(D(n,k)*approxv(m,k));  
+            end
+            dudx(m,n) = sum1;
+            dvdy(m,n) = sum2; 
+    innersum1 = innersum1 + w(n)*(dudx(m,n)+dvdy(m,n)-Fxy (m,n))^2; 
+    end
+    outersum1 = outersum1 + innersum1*w(m); 
+end
+J1 = outersum1 ;
+
+outersum1=0;
+outersum2=0;
+for m = 1:N*Kx-(Kx-1) 
+innersum1=0; 
+innersum2=0;
+    for n =1:N*Kx-(Kx-1) 
+        sum1=0;
+        sum2=0; 
+        for k=1:N*Kx-(Kx-1) 
+            sum1 = sum1+(D(m,k)*approxphi(k,n));
+            sum2 = sum2+(D(n,k)*approxphi(m,k)); 
+        end
+        dphidx(m,n) = sum1;
+        dphidy(m,n) = sum2; 
+        innersum1 = innersum1 + w(n)*(dphidx(m,n) + approxu(m,n) )^2; 
+        innersum2 = innersum2 + w(n)*(dphidy(m,n) + approxv(m,n) )^2; 
+    end
+    outersum1 = outersum1 + innersum1*w(m); 
+    outersum2 = outersum2 + innersum2*w(m); 
+end
+J2 = outersum1;
+J3 = outersum2 ;
+
+outersum1=0;
+for m = 1:N*Kx-(Kx-1) 
+innersum1=0;    
+    for n =1:N*Kx-(Kx-1) 
+        sum1=0;
+        sum2=0; 
+            for k=1:N*Kx-(Kx-1) 
+               sum1 = sum1+(D(m,k)*approxu(k,n));
+               sum2 = sum2+(D(n,k)*approxv(m,k)); 
+            end
+               dudx(m,n) = sum1;
+               dvdy(m,n) = sum2; 
+            
+    innersum1 = innersum1 + w(n)*(-dudx(m,n) + dvdy(m,n))^2; 
+    end
+    outersum1 = outersum1 + innersum1*w(m); 
+end
+J4 = outersum1 ;
+
+J1=J1^2;
+J2=J2^2;
+J3=J3^2;
+J4=J4^2;
+funcval = [J1,J2,J3,J4];
 
  
 fprintf('L2 errors for Example 4, i=1, using the LS SEM PGD, after one enrichment:')
@@ -666,3 +741,8 @@ fprintf('%8d ', Nvalues);
 fprintf('\n');
 fprintf('Time       ');
 disp( enrichmentTime); 
+
+fprintf('J1, J2, J3, J4 evaluated respectively (these are presented in Chapter 7 of the thesis):')
+fprintf('   ');
+fprintf('%6.2e ', funcval); 
+

@@ -324,6 +324,75 @@ for number=1:length(Nvalues)
     L2V(number)=QL2verror;
 end
 
+NP1 = N+1; 
+outersum1=0; 
+for m = 1:NP1
+innersum1=0;    
+   for n =1:NP1
+       sum1=0;
+       sum2=0; 
+            for k=1:NP1   
+               sum1 = sum1+(D(m,k)*approxu(k,n));
+               sum2 = sum2+(D(n,k)*approxv(m,k));  
+            end
+            dvdy(m,n) = sum1;
+            dudx(m,n) = sum2; 
+    innersum1 = innersum1 + w(n)*(dudx(m,n)+dvdy(m,n)-F(m,n))^2; 
+    end
+    outersum1 = outersum1 + innersum1*w(m); 
+end
+J1 = outersum1 ;
+ 
+
+outersum1=0;
+outersum2=0;
+for m = 1:NP1
+innersum1=0; 
+innersum2=0;
+    for n =1:NP1
+        sum1=0;
+        sum2=0; 
+            for k=1:NP1
+               sum1 = sum1+(D(m,k)*approxphi(k,n));
+               sum2 = sum2+(D(n,k)*approxphi(m,k)); 
+            end
+               dphidx(m,n) = sum2;
+               dphidy(m,n) = sum1;  
+    innersum1 = innersum1 + w(n)*(dphidy(m,n) + approxu(m,n) )^2; 
+    innersum2 = innersum2 + w(n)*(dphidx(m,n) + approxv(m,n) )^2; 
+    end
+    outersum1 = outersum1 + innersum1*w(m); 
+    outersum2 = outersum2 + innersum2*w(m); 
+end
+J2 = outersum1;
+J3 = outersum2 ;
+
+outersum1=0;
+for m = 1:NP1
+innersum1=0;    
+    for n =1:NP1
+        sum1=0;
+        sum2=0; 
+            for k=1:NP1
+               sum1 = sum1+(D(m,k)*approxu(k,n));
+               sum2 = sum2+(D(n,k)*approxv(m,k)); 
+            end
+               dudx(m,n) = sum1;
+               dvdy(m,n) = sum2; 
+            
+    innersum1 = innersum1 + w(n)*(-dudx(m,n)+dvdy(m,n))^2; 
+    end
+    outersum1 = outersum1 + innersum1*w(m); 
+end
+J4 = outersum1 ;
+ 
+
+J1=J1^2;
+J2=J2^2;
+J3=J3^2;
+J4=J4^2;
+funcval = [J1,J2,J3,J4];
+
 N_values=Nvalues'; 
  
 fprintf('L2 errors for Example 4, i=1, using the LS SM PGD, after one enrichment:')
@@ -364,3 +433,8 @@ fprintf('%8d ', Nvalues);
 fprintf('\n');
 fprintf('Time       ');
 disp( enrichmentTime); 
+
+fprintf('J1, J2, J3, J4 evaluated respectively (these are presented in Chapter 7 of the thesis):')
+fprintf('   ');
+fprintf('%6.2e ', funcval); 
+
